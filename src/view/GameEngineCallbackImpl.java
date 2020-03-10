@@ -32,7 +32,7 @@ public class GameEngineCallbackImpl implements GameEngineCallback {
 
     @Override
     public void playerDieUpdate(Player player, Die die, GameEngine gameEngine) {
-        logger.log(Level.FINE, String.format("%s die %s rolled to %s",
+        logger.log(Level.INFO, String.format("%s die %s rolled to %s",
                 player.getPlayerName(), die.getNumber(), die));
     }
 
@@ -45,14 +45,18 @@ public class GameEngineCallbackImpl implements GameEngineCallback {
 
     @Override
     public void houseDieUpdate(Die die, GameEngine gameEngine) {
-        logger.log(Level.FINE, String.format("The House die %s rolled to %s",
+        logger.log(Level.INFO, String.format("The House die %s rolled to %s",
                 die.getNumber(), die));
 
     }
 
     @Override
     public void houseResult(DicePair result, GameEngine gameEngine) {
-        logger.log(Level.FINE, String.format("House *RESULT*: %s", result));
+        logger.log(Level.INFO, String.format("House *RESULT*: %s", result));
+        String playersInfo = "";
+        for (Player item : gameEngine.getAllPlayers())
+            playersInfo += item.toString() + "\n";
+        logger.log(Level.INFO, "FINAL PLAYER RESULTS\n" + playersInfo);
     }
 
     // TODO implement rest of interface

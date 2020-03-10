@@ -44,12 +44,14 @@ public class GameEngineImpl implements GameEngine {
         DicePair result = rolling(null, initialDelay1, finalDelay1,
                 delayIncrement1, initialDelay2, finalDelay2, delayIncrement2);
 
+        for (Player player : playerList)
+            applyWinLoss(player, result);
+
         for (GameEngineCallback item : gameEngineCallbackList)
             item.houseResult(result, this);
 
         for (Player player : playerList)
-            applyWinLoss(player, result);
-
+            player.resetBet();
     }
 
     @Override
@@ -58,8 +60,6 @@ public class GameEngineImpl implements GameEngine {
             player.setPoints(player.getPoints() - player.getBet());
         } else if (player.getResult().compareTo(houseResult) > 0) {
             player.setPoints(player.getPoints() + player.getBet());
-        } else {
-            player.resetBet();
         }
 
     }
@@ -123,31 +123,35 @@ public class GameEngineImpl implements GameEngine {
     private DicePair rolling(Player player, int initialDelay1, int finalDelay1,
             int delayIncrement1, int initialDelay2, int finalDelay2,
             int delayIncrement2) {
-        int count = 0;
+        long startTime1 = System.currentTimeMillis();
+        long startTime2 = System.currentTimeMillis();
         DicePair result = null;
-
-        while (finalDelay1 != initialDelay1 + count
-                && finalDelay2 != initialDelay2 + count) {
+        while (initialDelay1 < finalDelay1 || initialDelay2 < finalDelay2) {
             result = new DicePairImpl();
-            if (count % delayIncrement1 == 0) {
+            if (initialDelay1 < finalDelay1 && System
+                    .currentTimeMillis() >= initialDelay1 + startTime1) {
+
                 for (GameEngineCallback item : gameEngineCallbackList) {
                     if (player != null)
                         item.playerDieUpdate(player, result.getDie1(), this);
                     else
                         item.houseDieUpdate(result.getDie1(), this);
-
                 }
+                startTime1 = System.currentTimeMillis();
+                initialDelay1 += delayIncrement1;
             }
 
-            if (count % delayIncrement2 == 0) {
+            if (initialDelay2 < finalDelay2 && System
+                    .currentTimeMillis() >= initialDelay2 + startTime2) {
                 for (GameEngineCallback item : gameEngineCallbackList) {
                     if (player != null)
                         item.playerDieUpdate(player, result.getDie2(), this);
                     else
                         item.houseDieUpdate(result.getDie2(), this);
                 }
+                startTime2 = System.currentTimeMillis();
+                initialDelay2 += delayIncrement2;
             }
-            ++count;
         }
         return result;
     }
